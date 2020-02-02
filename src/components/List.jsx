@@ -22,7 +22,7 @@ class List extends Component{
   renderItems = async(items) => {
     try {
       let children = items.map((item, i) => {
-          return <Item key={i} qty={item.quantity} item={item.id} price={item.price}/>
+          return <Item key={i} qty={item.quantity} item={item.name} price={item.price}/>
       })
       this.setState({
         Children: children
@@ -32,17 +32,32 @@ class List extends Component{
     }
   }
 
+  setItems = async(items) => {
+    let newItems = await items.forEach(async item=>{
+      let response = await axios.get("/itemDetails?itemId=" + item.id)
+      console.log("name",response.data.items.name)
+      console.log("item=", {...item, name: response.data.items.name})
+      return ({...item, name: response.data.items.name})
+    })
+    console.log("newItems", await newItems)
+    return newItems
+
+    // this.setState({
+    //   Items: newItems
+    // })
+    // this.renderItems(this.state.Items)
+    // return new Promise(newItems)
+  }
+
   renderOrders = async() => {
     try {
       let res = await axios.get("/orderDetails?orderId=" + orderId);
       console.log("Orders",res)
       let items = res.data.items;
+      console.log("items=", items)
 
-      this.setState({
-        Items: items
-      })
-
-      this.renderItems(this.state.Items)
+      let newItems = await this.setItems(items)
+      // console.log("new items", newItems)
 
     } catch (err) {
       console.log(err);
